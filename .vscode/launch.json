@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Wails: Production WhisperGo",
+      "type": "go",
+      "request": "launch",
+      "mode": "exec",
+      "program": "${workspaceFolder}/build/bin/whispergo",
+      "preLaunchTask": "build",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Wails: Debug WhisperGo",
+      "type": "go",
+      "request": "launch",
+      "mode": "exec",
+      "program": "${workspaceFolder}/build/bin/whispergo",
+      "preLaunchTask": "build debug",
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "name": "Wails: Dev WhisperGo",
+      "type": "go",
+      "request": "launch",
+      "mode": "exec",
+      "program": "${workspaceFolder}/build/bin/whispergo",
+      "preLaunchTask": "build dev",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
