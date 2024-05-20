@@ -20,7 +20,7 @@ This project showcases the efficiency of the Whisper model, which is capable of 
 - Go 1.20+
 - Node.js 15+ and pnpm
 - Wails 2.8+ and its dependencies
-- GCC 12+, make and jq
+- GCC 12+, make and wget
 - (Optional) CUDA 12.0+ for GPU acceleration
 
 ## Building
