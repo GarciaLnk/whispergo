@@ -1,0 +1,80 @@
+name: Build
+
+on:
+  push:
+    tags:
+      - "*"
+
+env:
+  NODE_OPTIONS: "--max-old-space-size=4096"
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+          - name: "whispergo-linux"
+            platform: "linux/amd64"
+            os: "ubuntu-latest"
+          - name: "whispergo-windows.exe"
+            platform: "windows/amd64"
+            os: "windows-latest"
+
+    runs-on: ${{matrix.build.os}}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup GoLang
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.21"
+      - run: go version
+        shell: bash
+
+      - name: Setup NodeJS
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Install Wails
+        run: go install github.com/wailsapp/wails/v2/cmd/wails@latest
+        shell: bash
+      - name: Install Linux deps
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libgtk-3-0 libwebkit2gtk-4.0-dev gcc-aarch64-linux-gnu upx-ucl
+        shell: bash
+      - name: Install Windows deps
+        if: runner.os == 'Windows'
+        run: choco install wget upx
+        shell: bash
+
+      - name: Build Linux App
+        if: runner.os == 'Linux'
+        run: BUILD_ARGS="--platform ${{matrix.build.platform}} -upx" PROJECT_NAME=${{matrix.build.name}} make
+        shell: bash
+      - name: Build Windows App
+        if: runner.os == 'Windows'
+        run: BUILD_ARGS="--platform ${{matrix.build.platform}} -upx" PROJECT_NAME=${{matrix.build.name}} make CC=gcc.exe
+        shell: bash
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Build ${{runner.os}} ${{matrix.build.name}}
+          path: |
+            */bin/
+            *\bin\*
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            */bin/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
